@@ -3,208 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaiderWatch Schedule Tracker</title>
+    <title>RaiderWatch - Enhanced School Schedule Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-primary: #8b0000; /* Dark Red/Maroon (Raiders Color) */
-            --color-secondary: #f0f0f0;
-            --color-text: #333;
-            --color-background: #ffffff;
-            --color-light-gray: #eee;
-            --color-dark-gray: #555;
-            --color-active: #ffc107; /* Amber/Gold for active state */
+            /* Default Theme */
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a35;
+            --bg-tertiary: #252547;
+            --text-primary: #cccccc;
+            --text-secondary: #999999;
+            --text-accent: #00d4aa;
+            --border-color: #333366;
+            --progress-bg: #ffffff;
+            --progress-fill: #00d4aa;
+            --card-bg: rgba(37, 37, 71, 0.8);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.3);
+            
+            /* Period Colors */
+            --red: #ff6b6b;
+            --orange: #ffa726;
+            --yellow: #ffeb3b;
+            --green: #66bb6a;
+            --light-blue: #42a5f5;
+            --royal-blue: #3f51b5;
+            --purple: #ab47bc;
+        }
+
+        [data-theme="ocean"] {
+            --bg-primary: #0a1929;
+            --bg-secondary: #1e3a5f;
+            --bg-tertiary: #2d5aa0;
+            --text-primary: #e3f2fd;
+            --text-secondary: #90caf9;
+            --text-accent: #00bcd4;
+            --border-color: #1976d2;
+            --progress-fill: #00bcd4;
+            --card-bg: rgba(30, 58, 95, 0.9);
+        }
+
+        [data-theme="forest"] {
+            --bg-primary: #1b2e1b;
+            --bg-secondary: #2d4a2d;
+            --bg-tertiary: #4a7c59;
+            --text-primary: #e8f5e8;
+            --text-secondary: #a5d6a7;
+            --text-accent: #66bb6a;
+            --border-color: #388e3c;
+            --progress-fill: #4caf50;
+            --card-bg: rgba(45, 74, 45, 0.9);
+        }
+
+        [data-theme="sunset"] {
+            --bg-primary: #2e1a00;
+            --bg-secondary: #5d2f00;
+            --bg-tertiary: #8a4500;
+            --text-primary: #fff3e0;
+            --text-secondary: #ffcc80;
+            --text-accent: #ff9800;
+            --border-color: #f57c00;
+            --progress-fill: #ff6f00;
+            --card-bg: rgba(93, 47, 0, 0.9);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e0e0e0;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-accent: #1976d2;
+            --border-color: #cccccc;
+            --progress-bg: #333333;
+            --progress-fill: #1976d2;
+            --card-bg: rgba(245, 245, 245, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--color-background);
-            color: var(--color-text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
-            width: 100%;
-            max-width: 600px;
-            background: var(--color-secondary);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
 
-        h1 {
-            color: var(--color-primary);
+        .header {
             text-align: center;
-            margin-bottom: 5px;
-            font-size: 1.8em;
+            margin-bottom: 40px;
         }
 
-        #day-display {
-            text-align: center;
-            font-size: 1.1em;
-            color: var(--color-dark-gray);
-            margin-bottom: 20px;
-        }
-
-        /* --- Main Display Area --- */
-        #main-display {
-            margin-bottom: 25px;
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: var(--color-light-gray);
-        }
-
-        .period-status {
-            padding: 15px;
-            border-radius: 6px;
-            color: white;
-            transition: background-color 0.3s;
-        }
-
-        .period-status h2 {
-            margin: 0;
-            font-size: 1.7em;
-            font-weight: 600;
-        }
-
-        .period-status p {
-            margin: 5px 0 0;
-            font-size: 1em;
-        }
-
-        .period-status.no-school { background-color: #007bff; }
-        .period-status.before-school { background-color: #4a90e2; }
-        .period-status.after-school { background-color: #7f8c8d; }
-        .period-status.meeting, .period-status.advisory { background-color: #f39c12; }
-        .period-status.lunch { background-color: #2ecc71; }
-        .period-status.study, .period-status.late-start, .period-status.info { background-color: #9b59b6; }
-        .period-status.passing { background-color: #34495e; }
-        .period-status.no-period { background-color: #c0392b; }
-
-        /* Specific Color Classes */
-        .period-red { background-color: #e74c3c; }
-        .period-orange { background-color: #e67e22; }
-        .period-yellow { background-color: #f1c40f; color: #333; }
-        .period-green { background-color: #27ae60; }
-        .period-light-blue { background-color: #3498db; }
-        .period-royal-blue { background-color: #2980b9; }
-        .period-purple { background-color: #8e44ad; }
-        
-        .remaining-time {
-            font-size: 1.5em !important;
+        .header h1 {
+            font-size: 3.5rem;
             font-weight: 700;
-            margin-top: 10px !important;
+            background: linear-gradient(135deg, var(--text-accent) 0%, var(--text-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
         }
 
-        /* --- Full Schedule List --- */
-        #period-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 300;
         }
 
-        #period-list li {
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px var(--shadow);
+        }
+
+        .timer-display {
+            text-align: center;
+            grid-column: 2;
+        }
+
+        .current-period {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .countdown {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .progress-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+
+        .progress-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            background: conic-gradient(var(--progress-fill) 0deg, var(--bg-tertiary) 0deg);
+            transition: all 0.5s ease;
+        }
+
+        .progress-center {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .schedule-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .schedule-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            opacity: 0.8;
-            transition: opacity 0.3s, transform 0.3s;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        #period-list li.active {
-            opacity: 1;
-            transform: scale(1.02);
-            border: 2px solid var(--color-active);
-            box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+        .schedule-item:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(5px);
         }
 
-        .period-name {
+        .schedule-item.active {
+            background: var(--text-accent);
+            color: var(--bg-primary);
+            border-left-color: var(--progress-bg);
             font-weight: 600;
         }
 
-        .period-time {
-            font-size: 0.9em;
-            background: rgba(0, 0, 0, 0.15);
-            padding: 3px 8px;
-            border-radius: 4px;
+        .schedule-item.late-lunch {
+            border-left-color: var(--yellow);
         }
 
-        /* --- Settings/Late Lunch Controls --- */
-        .settings-container {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--color-light-gray);
-            text-align: center;
-        }
-
-        .settings-container h3 {
-            color: var(--color-primary);
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-
-        .late-lunch-toggles {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .late-lunch-toggle {
-            background-color: var(--color-light-gray);
-            color: var(--color-dark-gray);
-            border: 2px solid var(--color-dark-gray);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-            font-size: 0.9em;
+        .period-name {
             font-weight: 500;
         }
 
-        .late-lunch-toggle.active {
-            background-color: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
+        .period-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
-        .late-lunch-toggle:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-section {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .control-section h3 {
+            margin-bottom: 15px;
+            color: var(--text-accent);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .theme-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .theme-option {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .theme-option:hover {
+            border-color: var(--text-accent);
+        }
+
+        .theme-option.active {
+            border-color: var(--text-accent);
+            background: var(--text-accent);
+            color: var(--bg-primary);
+        }
+
+        .lunch-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lunch-day {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: var(--border-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active {
+            background: var(--text-accent);
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background: var(--progress-bg);
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active::after {
+            left: 27px;
+        }
+
+        .next-period {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .next-period h4 {
+            color: var(--text-accent);
+            margin-bottom: 5px;
+        }
+
+        /* Period color classes */
+        .period-red { color: var(--red); }
+        .period-orange { color: var(--orange); }
+        .period-yellow { color: var(--yellow); }
+        .period-green { color: var(--green); }
+        .period-light-blue { color: var(--light-blue); }
+        .period-royal-blue { color: var(--royal-blue); }
+        .period-purple { color: var(--purple); }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .countdown {
+                font-size: 3rem;
+            }
+            
+            .current-period {
+                font-size: 2rem;
+            }
+            
+            .theme-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar styling */
+        .schedule-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .schedule-list::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .schedule-list::-webkit-scrollbar-thumb {
+            background: var(--text-accent);
+            border-radius: 4px;
+        }
+
+        /* Animation for progress ring */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        /* Late lunch indicator */
+        .late-lunch-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            background: var(--yellow);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
         }
     </style>
 </head>
-<body>
-
+<body data-theme="default">
     <div class="container">
-        <h1>RaiderWatch ⌚</h1>
-        <div id="day-display">Loading...</div>
+        <header class="header">
+            <h1>RaiderWatch</h1>
+            <p>Enhanced School Schedule Tracker</p>
+        </header>
 
-        <div id="main-display">
+        <div class="main-grid">
+            <!-- Settings Panel -->
+            <div class="card controls">
+                <div class="control-section">
+                    <h3>🎨 Theme</h3>
+                    <div class="theme-selector">
+                        <div class="theme-option active" data-theme="default">Default</div>
+                        <div class="theme-option" data-theme="ocean">Ocean</div>
+                        <div class="theme-option" data-theme="forest">Forest</div>
+                        <div class="theme-option" data-theme="sunset">Sunset</div>
+                        <div class="theme-option" data-theme="light">Light</div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>🍽️ Late Lunch Days</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px;">
+                        On late lunch days, you attend class first, then have lunch 45 minutes into the period.
+                    </p>
+                    <div class="lunch-settings">
+                        <div class="lunch-day">
+                            <span>Day 1 (Monday)</span>
+                            <div class="switch" data-day="1"></div>
+                        </div>
+                        <div class="lunch-day">
+                            <span>Day 2 (Tuesday)</span>
+                            <div class="switch" data-day="2"></div>
+                        </div>
+                        <div class="lunch-day">
+                            <span>Day 3 (Wednesday)</span>
+                            <div class="switch" data-day="3"></div>
+                        </div>
+                        <div class="lunch-day">
+                            <span>Day 4 (Thursday)</span>
+                            <div class="switch" data-day="4"></div>
+                        </div>
+                        <div class="lunch-day">
+                            <span>Day 5 (Friday)</span>
+                            <div class="switch active" data-day="5"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        <h2>Today's Schedule</h2>
-        <ul id="period-list">
-            </ul>
+            <!-- Main Timer Display -->
+            <div class="card timer-display">
+                <div class="current-period" id="currentPeriod">Loading...</div>
+                <div class="countdown" id="countdown">--:--:--</div>
+                <div class="progress-container">
+                    <div class="progress-ring" id="progressRing"></div>
+                    <div class="progress-center" id="progressCenter">0%</div>
+                </div>
+                <div class="next-period" id="nextPeriod">
+                    <h4>Next Period</h4>
+                    <div>Loading...</div>
+                </div>
+            </div>
 
-        <div class="settings-container">
-            <h3>Late Lunch Toggle (Standard Days Only)</h3>
-            <div class="late-lunch-toggles">
-                <button class="late-lunch-toggle" data-day="1">Mon</button>
-                <button class="late-lunch-toggle" data-day="2">Tue</button>
-                <button class="late-lunch-toggle" data-day="3">Wed</button>
-                <button class="late-lunch-toggle" data-day="4">Thu</button>
-                <button class="late-lunch-toggle" data-day="5">Fri</button>
+            <!-- Schedule Display -->
+            <div class="card">
+                <h3 style="margin-bottom: 20px; color: var(--text-accent);">📅 Today's Schedule</h3>
+                <div class="schedule-list" id="scheduleList">
+                    <!-- Schedule items will be populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>
@@ -214,8 +501,7 @@
             constructor() {
                 this.settings = this.loadSettings();
                 this.schedules = {
-                    // Day 1: Monday (Standard)
-                    1: [
+                    1: [ // Monday (Day 1)
                         { period: 'Red', start: '08:45', end: '09:30', color: 'period-red', type: 'class' },
                         { period: 'Passing Period', start: '09:30', end: '09:35', color: '', type: 'passing' },
                         { period: 'Orange', start: '09:35', end: '10:20', color: 'period-orange', type: 'class' },
@@ -230,8 +516,7 @@
                         { period: 'Passing Period', start: '14:30', end: '14:35', color: '', type: 'passing' },
                         { period: 'Purple', start: '14:35', end: '15:20', color: 'period-purple', type: 'class' }
                     ],
-                    // Day 2: Tuesday (Standard Schedule - RESTORED)
-                    2: [
+                    2: [ // Tuesday (Day 2)
                         { period: 'Yellow', start: '08:45', end: '10:00', color: 'period-yellow', type: 'class' },
                         { period: 'Morning Meetings', start: '10:00', end: '10:15', color: '', type: 'meeting' },
                         { period: 'Meetings', start: '10:15', end: '10:45', color: '', type: 'meeting' },
@@ -242,8 +527,7 @@
                         { period: 'Advisory', start: '14:05', end: '14:20', color: '', type: 'advisory' },
                         { period: 'Raider Hour', start: '14:20', end: '15:20', color: '', type: 'study' }
                     ],
-                    // Day 3: Wednesday (Standard)
-                    3: [
+                    3: [ // Wednesday (Day 3)
                         { period: 'Light Blue', start: '08:45', end: '10:00', color: 'period-light-blue', type: 'class' },
                         { period: 'Meetings', start: '10:00', end: '10:45', color: '', type: 'meeting' },
                         { period: 'Green', start: '10:45', end: '12:00', color: 'period-green', type: 'class' },
@@ -252,8 +536,7 @@
                         { period: 'Passing Period', start: '14:00', end: '14:05', color: '', type: 'passing' },
                         { period: 'Royal Blue', start: '14:05', end: '15:20', color: 'period-royal-blue', type: 'class' }
                     ],
-                    // Day 4: Thursday (Standard)
-                    4: [
+                    4: [ // Thursday (Day 4)
                         { period: 'Late Start', start: '08:45', end: '10:00', color: '', type: 'late-start' },
                         { period: 'Red', start: '10:00', end: '11:15', color: 'period-red', type: 'class' },
                         { period: 'Morning Meetings', start: '11:15', end: '11:30', color: '', type: 'meeting' },
@@ -263,8 +546,7 @@
                         { period: 'Passing Period', start: '14:00', end: '14:05', color: '', type: 'passing' },
                         { period: 'Yellow', start: '14:05', end: '15:20', color: 'period-yellow', type: 'class' }
                     ],
-                    // Day 5: Friday (Standard)
-                    5: [
+                    5: [ // Friday (Day 5)
                         { period: 'Royal Blue', start: '08:45', end: '10:00', color: 'period-royal-blue', type: 'class' },
                         { period: 'Advisory', start: '10:00', end: '10:25', color: '', type: 'advisory' },
                         { period: 'Meetings', start: '10:25', end: '10:45', color: '', type: 'meeting' },
@@ -275,74 +557,67 @@
                         { period: 'Light Blue', start: '14:05', end: '15:20', color: 'period-light-blue', type: 'class' }
                     ]
                 };
-
-                // ONE-TIME special schedule override for 12/02/2025
-                this.specialSchedules = {
-                    '12/02/2025': [
-                        { period: 'Tuesday, December 2nd Late Start', start: '08:45', end: '10:00', color: '', type: 'info' },
-                        { period: 'YELLOW', start: '10:00', end: '11:15', color: 'period-yellow', type: 'class' },
-                        { period: 'Passing Period', start: '11:15', end: '11:20', color: '', type: 'passing' },
-                        { period: 'MORNING MEETING - JanTerm Walkthru', start: '11:20', end: '12:00', color: '', type: 'meeting' },
-                        // Lunch/Orange Class Block (12:00 - 2:00)
-                        { period: 'Lunch (Early)', start: '12:00', end: '12:45', color: '', type: 'lunch' },
-                        { period: 'ORANGE (Early Class)', start: '12:05', end: '12:45', color: 'period-orange', type: 'class', isLateLunchClass: true },
-                        { period: 'ORANGE (Late Class)', start: '12:45', end: '2:00', color: 'period-orange', type: 'class', isLateLunchClass: true },
-                        { period: 'Lunch (Late)', start: '12:45', end: '1:25', color: '', type: 'lunch' },
-                        { period: 'ORANGE (Late Class Cont.)', start: '1:25', end: '2:00', color: 'period-orange', type: 'class', isLateLunchClass: true },
-                        // End Lunch/Orange Block
-                        { period: 'Passing Period', start: '2:00', end: '2:05', color: '', type: 'passing' },
-                        { period: 'RED', start: '2:05', end: '3:20', color: 'period-red', type: 'class' }
-                    ]
-                };
-
                 this.init();
             }
 
             loadSettings() {
+                const defaultSettings = {
+                    theme: 'default',
+                    lateLunchDays: { 5: true } // Default to Friday having late lunch
+                };
                 try {
-                    const settings = JSON.parse(localStorage.getItem('raiderWatchSettings'));
-                    return settings || {
-                        lateLunchDays: { 1: false, 2: false, 3: false, 4: false, 5: false }
-                    };
+                    const saved = localStorage.getItem('raiderwatch-settings');
+                    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
                 } catch (e) {
-                    console.error("Error loading settings:", e);
-                    return { lateLunchDays: { 1: false, 2: false, 3: false, 4: false, 5: false } };
+                    return defaultSettings;
                 }
             }
 
             saveSettings() {
-                localStorage.setItem('raiderWatchSettings', JSON.stringify(this.settings));
-                this.updateDisplay();
+                localStorage.setItem('raiderwatch-settings', JSON.stringify(this.settings));
             }
 
             init() {
-                this.setupEventListeners();
+                this.setupTheme();
+                this.setupLateLunchControls();
                 this.updateDisplay();
-                // Update every 5 seconds
-                setInterval(() => this.updateDisplay(), 5000); 
+                this.startTimer();
             }
 
-            setupEventListeners() {
-                const lateLunchToggles = document.querySelectorAll('.late-lunch-toggle');
-                lateLunchToggles.forEach(toggle => {
-                    toggle.addEventListener('click', (e) => {
-                        const day = e.target.getAttribute('data-day');
-                        if (day && !e.target.disabled) { // Check if not disabled by special schedule
-                            this.settings.lateLunchDays[day] = !this.settings.lateLunchDays[day];
-                            this.saveSettings();
-                        }
+            setupTheme() {
+                // Apply saved theme
+                document.body.setAttribute('data-theme', this.settings.theme);
+                
+                // Update theme selector
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.classList.toggle('active', option.dataset.theme === this.settings.theme);
+                    option.addEventListener('click', (e) => {
+                        document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.settings.theme = e.target.dataset.theme;
+                        document.body.setAttribute('data-theme', this.settings.theme);
+                        this.saveSettings();
                     });
-                    // Initialize button state
-                    const day = toggle.getAttribute('data-day');
-                    if (day && this.settings.lateLunchDays[day]) {
-                        toggle.classList.add('active');
-                    }
+                });
+            }
+
+            setupLateLunchControls() {
+                document.querySelectorAll('.switch').forEach(switchEl => {
+                    const day = parseInt(switchEl.dataset.day);
+                    switchEl.classList.toggle('active', this.settings.lateLunchDays[day] || false);
+                    
+                    switchEl.addEventListener('click', () => {
+                        const isActive = switchEl.classList.toggle('active');
+                        this.settings.lateLunchDays[day] = isActive;
+                        this.saveSettings();
+                        this.updateDisplay(); // Refresh display to show late lunch indicators
+                    });
                 });
             }
 
             getDayType(dayOfWeek) {
-                // Monday=1, Tuesday=2, ..., Friday=5
-                return dayOfWeek >= 1 && dayOfWeek <= 5 ? dayOfWeek : null;
+                const days = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };
+                return days[dayOfWeek] || null;
             }
 
             getCurrentSchedule() {
@@ -351,27 +626,12 @@
                 const dayType = this.getDayType(dayOfWeek);
                 
                 if (!dayType || dayOfWeek === 0 || dayOfWeek === 6) {
-                    return null; // Weekend or invalid day
+                    return null; // Weekend
                 }
-
-                // --- Check for a special schedule override first ---
-                // Get date in MM/DD/YYYY format and remove leading zeros for match: M/D/YYYY
-                const dateKey = now.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '/');
-                const dateKeyClean = dateKey.replace(/^0|(?<=\/)0/g, ''); 
                 
-                // Use a standard date format key for lookup: '12/2/2025'
-                const specialSchedule = this.specialSchedules[dateKeyClean];
-
-                if (specialSchedule) {
-                    return { schedule: specialSchedule, dayType: 'special', dayOfWeek };
-                }
-                // --- End Special Schedule Check ---
-                
-                // Fall back to standard schedules
                 let schedule = [...this.schedules[dayType]];
                 
-                // Placeholder for applying Late Lunch modification if necessary 
-                // (requires defined standard A/B lunch structure)
+                // Handle late lunch for this day
                 if (this.settings.lateLunchDays[dayType]) {
                     schedule = this.applyLateLunch(schedule, dayType);
                 }
@@ -380,145 +640,222 @@
             }
 
             applyLateLunch(schedule, dayType) {
-                // Since the standard Day 2 schedule doesn't have an A/B lunch split defined,
-                // this is left as a placeholder. In a real application, you would swap the periods here.
-                return schedule;
+                // Find the first class period after lunch
+                const lunchIndex = schedule.findIndex(p => p.type === 'lunch');
+                if (lunchIndex === -1) return schedule;
+                
+                const nextClassIndex = schedule.findIndex((p, i) => i > lunchIndex && p.type === 'class');
+                if (nextClassIndex === -1) return schedule;
+                
+                const nextClass = schedule[nextClassIndex];
+                const startTime = this.parseTime(nextClass.start);
+                const endTime = this.parseTime(nextClass.end);
+                
+                // Split the class: 45 minutes class, then 45 minutes lunch
+                const lunchStartTime = new Date(startTime.getTime() + 45 * 60000);
+                const classResumeTime = new Date(lunchStartTime.getTime() + 45 * 60000);
+                
+                const modifiedSchedule = [...schedule];
+                
+                // Modify the class period to end when lunch starts
+                modifiedSchedule[nextClassIndex] = {
+                    ...nextClass,
+                    end: this.formatTime(lunchStartTime),
+                    isLateLunchClass: true
+                };
+                
+                // Insert late lunch period
+                modifiedSchedule.splice(nextClassIndex + 1, 0, {
+                    period: 'Late Lunch',
+                    start: this.formatTime(lunchStartTime),
+                    end: this.formatTime(classResumeTime),
+                    color: '',
+                    type: 'late-lunch'
+                });
+                
+                // Insert class continuation
+                modifiedSchedule.splice(nextClassIndex + 2, 0, {
+                    period: nextClass.period + ' (Cont.)',
+                    start: this.formatTime(classResumeTime),
+                    end: nextClass.end,
+                    color: nextClass.color,
+                    type: 'class'
+                });
+                
+                return modifiedSchedule;
+            }
+
+            parseTime(timeStr) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                const date = new Date();
+                date.setHours(hours, minutes, 0, 0);
+                return date;
+            }
+
+            formatTime(date) {
+                return date.toTimeString().substring(0, 5);
             }
 
             getCurrentPeriod(schedule) {
                 const now = new Date();
-                const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight
-
-                for (const period of schedule) {
-                    const startTimeParts = period.start.split(':').map(Number);
-                    const endTimeParts = period.end.split(':').map(Number);
-
-                    const startMinutes = startTimeParts[0] * 60 + startTimeParts[1];
-                    const endMinutes = endTimeParts[0] * 60 + endTimeParts[1];
-
-                    // Check if current time is within the period start and end times
-                    if (currentTime >= startMinutes && currentTime < endMinutes) {
-                        return { ...period, remainingTime: endMinutes - currentTime };
-                    }
-                }
-
-                // Check if before the first period
-                if (schedule.length > 0) {
-                    const firstPeriodStartParts = schedule[0].start.split(':').map(Number);
-                    const firstPeriodStartMinutes = firstPeriodStartParts[0] * 60 + firstPeriodStartParts[1];
-                    if (currentTime < firstPeriodStartMinutes) {
-                        return { period: 'Before School', start: '00:00', end: schedule[0].start, color: '', type: 'before-school', remainingTime: firstPeriodStartMinutes - currentTime };
+                
+                for (let i = 0; i < schedule.length; i++) {
+                    const period = schedule[i];
+                    const startTime = this.parseTime(period.start);
+                    const endTime = this.parseTime(period.end);
+                    
+                    if (now >= startTime && now <= endTime) {
+                        return {
+                            ...period,
+                            index: i,
+                            startTime,
+                            endTime,
+                            next: schedule[i + 1] || null
+                        };
                     }
                 }
                 
-                // Check if after the last period
-                if (schedule.length > 0) {
-                    const lastPeriod = schedule[schedule.length - 1];
-                    const lastPeriodEndParts = lastPeriod.end.split(':').map(Number);
-                    const lastPeriodEndMinutes = lastPeriodEndParts[0] * 60 + lastPeriodEndParts[1];
-                    if (currentTime >= lastPeriodEndMinutes) {
-                        return { period: 'After School', start: lastPeriod.end, end: '23:59', color: '', type: 'after-school', remainingTime: 0 };
-                    }
-                }
-
                 return null;
             }
 
             updateDisplay() {
-                const scheduleInfo = this.getCurrentSchedule();
-                const mainDisplay = document.getElementById('main-display');
-                const periodList = document.getElementById('period-list');
-                const dayDisplay = document.getElementById('day-display');
-                const lateLunchToggles = document.querySelectorAll('.late-lunch-toggle');
-
-                if (!scheduleInfo) {
-                    mainDisplay.innerHTML = `
-                        <div class="period-status no-school">
-                            <h2>It's the Weekend! 🥳</h2>
-                            <p>Enjoy your break. RaiderWatch will resume on Monday.</p>
-                        </div>
-                    `;
-                    dayDisplay.textContent = 'Weekend';
-                    periodList.innerHTML = '';
-                    lateLunchToggles.forEach(toggle => toggle.disabled = true);
+                const scheduleData = this.getCurrentSchedule();
+                
+                if (!scheduleData) {
+                    this.displayNotInSession();
                     return;
                 }
-
-                const currentPeriod = this.getCurrentPeriod(scheduleInfo.schedule);
                 
-                // Update Day Display
-                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                let dayName = dayNames[scheduleInfo.dayOfWeek];
+                const { schedule, dayType } = scheduleData;
+                const currentPeriod = this.getCurrentPeriod(schedule);
                 
-                if (scheduleInfo.dayType === 'special') {
-                    dayName = `**Today: ${dayName}, ${scheduleInfo.schedule[0].period}**`;
-                    lateLunchToggles.forEach(toggle => {
-                        toggle.disabled = true;
-                        toggle.classList.remove('active');
-                    });
-                } else {
-                    dayName = `Today is ${dayName}`;
-                    lateLunchToggles.forEach(toggle => {
-                        const day = toggle.getAttribute('data-day');
-                        toggle.disabled = false;
-                        toggle.classList.toggle('active', this.settings.lateLunchDays[day]);
-                    });
-                }
-                dayDisplay.innerHTML = dayName;
-
-
-                // Update Main Display
+                this.displayScheduleList(schedule, currentPeriod, dayType);
+                
                 if (currentPeriod) {
-                    const remainingMinutes = currentPeriod.remainingTime;
-                    const hours = Math.floor(remainingMinutes / 60);
-                    const minutes = remainingMinutes % 60;
-                    
-                    let remainingText = '';
-                    if (currentPeriod.type !== 'after-school') {
-                        if (remainingMinutes > 0) {
-                             remainingText = `Ends in ${hours > 0 ? hours + ' hr ' : ''}${minutes} min`;
-                        } else {
-                            remainingText = 'Time\'s up! Next period starting soon.';
-                        }
-                    } else {
-                        remainingText = 'Classes are over for the day. See you tomorrow!';
-                    }
+                    this.displayCurrentPeriod(currentPeriod);
+                } else {
+                    this.displayNotInSession();
+                }
+            }
 
-
-                    mainDisplay.innerHTML = `
-                        <div class="period-status ${currentPeriod.color || currentPeriod.type}">
-                            <h2>${currentPeriod.period}</h2>
-                            <p class="time-range">${currentPeriod.start} - ${currentPeriod.end}</p>
-                            <p class="remaining-time">${remainingText}</p>
+            displayCurrentPeriod(currentPeriod) {
+                const now = new Date();
+                const timeRemaining = currentPeriod.endTime.getTime() - now.getTime();
+                const totalTime = currentPeriod.endTime.getTime() - currentPeriod.startTime.getTime();
+                const progress = Math.max(0, (totalTime - timeRemaining) / totalTime);
+                
+                // Update current period display
+                const periodEl = document.getElementById('currentPeriod');
+                periodEl.innerHTML = `<span class="${currentPeriod.color}">${currentPeriod.period}</span>`;
+                
+                // Update countdown
+                this.updateCountdown(timeRemaining);
+                
+                // Update progress ring
+                this.updateProgressRing(progress);
+                
+                // Update next period
+                const nextPeriodEl = document.getElementById('nextPeriod');
+                if (currentPeriod.next) {
+                    nextPeriodEl.innerHTML = `
+                        <h4>Next Period</h4>
+                        <div class="${currentPeriod.next.color}">${currentPeriod.next.period}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px;">
+                            ${currentPeriod.next.start} - ${currentPeriod.next.end}
                         </div>
                     `;
                 } else {
-                    mainDisplay.innerHTML = `
-                        <div class="period-status no-period">
-                            <h2>No Active Period</h2>
-                            <p>Check the schedule below.</p>
-                        </div>
+                    nextPeriodEl.innerHTML = `
+                        <h4>Next Period</h4>
+                        <div>End of School Day</div>
                     `;
                 }
+            }
 
-                // Update Period List
-                periodList.innerHTML = scheduleInfo.schedule.map(p => {
-                    const isActive = currentPeriod && p.period === currentPeriod.period;
-                    return `
-                        <li class="${isActive ? 'active' : ''} ${p.color || p.type}">
-                            <span class="period-name">${p.period}</span>
-                            <span class="period-time">${p.start} - ${p.end}</span>
-                        </li>
+            displayNotInSession() {
+                document.getElementById('currentPeriod').textContent = "School's Not in Session";
+                document.getElementById('countdown').textContent = "--:--:--";
+                document.getElementById('progressCenter').textContent = "--";
+                document.getElementById('nextPeriod').innerHTML = `
+                    <h4>Next Period</h4>
+                    <div>School is not currently in session</div>
+                `;
+                
+                const progressRing = document.getElementById('progressRing');
+                progressRing.style.background = 'conic-gradient(var(--bg-tertiary) 0deg, var(--bg-tertiary) 360deg)';
+            }
+
+            updateCountdown(timeRemaining) {
+                if (timeRemaining <= 0) {
+                    document.getElementById('countdown').textContent = "00:00:00";
+                    return;
+                }
+                
+                const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                const countdown = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('countdown').textContent = countdown;
+            }
+
+            updateProgressRing(progress) {
+                const degrees = Math.min(360, progress * 360);
+                const progressRing = document.getElementById('progressRing');
+                const progressCenter = document.getElementById('progressCenter');
+                
+                progressRing.style.background = `conic-gradient(var(--progress-fill) 0deg, var(--progress-fill) ${degrees}deg, var(--bg-tertiary) ${degrees}deg, var(--bg-tertiary) 360deg)`;
+                progressCenter.textContent = `${Math.round(progress * 100)}%`;
+                
+                // Add pulsing effect when time is running low
+                if (progress > 0.9) {
+                    progressCenter.classList.add('pulsing');
+                } else {
+                    progressCenter.classList.remove('pulsing');
+                }
+            }
+
+            displayScheduleList(schedule, currentPeriod, dayType) {
+                const scheduleList = document.getElementById('scheduleList');
+                scheduleList.innerHTML = '';
+                
+                schedule.forEach((period, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'schedule-item';
+                    
+                    if (currentPeriod && index === currentPeriod.index) {
+                        item.classList.add('active');
+                    }
+                    
+                    // Add late lunch indicator for the first class after lunch on late lunch days
+                    if (this.settings.lateLunchDays[dayType] && period.isLateLunchClass) {
+                        item.classList.add('late-lunch');
+                        const indicator = document.createElement('div');
+                        indicator.className = 'late-lunch-indicator';
+                        item.style.position = 'relative';
+                        item.appendChild(indicator);
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="period-name ${period.color}">${period.period}</div>
+                        <div class="period-time">${period.start} - ${period.end}</div>
                     `;
-                }).join('');
+                    
+                    scheduleList.appendChild(item);
+                });
+            }
+
+            startTimer() {
+                this.updateDisplay();
+                setInterval(() => {
+                    this.updateDisplay();
+                }, 1000);
             }
         }
 
-        // Initialize the application once the DOM is fully loaded
+        // Initialize the application when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof RaiderWatch !== 'undefined') {
-                new RaiderWatch();
-            }
+            new RaiderWatch();
         });
     </script>
 </body>
